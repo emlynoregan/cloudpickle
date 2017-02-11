@@ -1,8 +1,14 @@
-# cloudpickle
+# yccloudpickle
+This repo is a fork of cloudpickle. It adds the Y-Combinator based technique for modifying recursive inner functions to make them serializable, detailed in these articles:
 
-[![Build Status](https://travis-ci.org/cloudpipe/cloudpickle.svg?branch=master
-    )](https://travis-ci.org/cloudpipe/cloudpickle)
-[![codecov.io](https://codecov.io/github/cloudpipe/cloudpickle/coverage.svg?branch=master)](https://codecov.io/github/cloudpipe/cloudpickle?branch=master)
+* [Serialising Functions in Python](https://medium.com/@emlynoregan/serialising-all-the-functions-in-python-cd880a63b591#.f7a367n0b)
+* [Digging deeper into Recursive Inner Functions in Python](https://medium.com/@emlynoregan/digging-deeper-into-recursive-inner-functions-in-python-8ec6c5b1cbb#.ox04w1k7o)
+* [Manually rewriting recursive inner functions to be serialisable in Python](https://medium.com/@emlynoregan/manually-rewriting-recursive-inner-functions-to-be-serialisable-in-python-83895792b176#.9g3ibfgi3)
+* [Automatically Serialising Recursive Inner Functions in Python using the Y Combinator](https://medium.com/@emlynoregan/automatically-serialising-recursive-inner-functions-in-python-using-the-y-combinator-fc5d37e50b29#.of57pdbqb)
+
+The rest of this readme is from the source cloudpickle library.
+
+# cloudpickle 
 
 `cloudpickle` makes it possible to serialize Python constructs not supported
 by the default `pickle` module from the Python standard library.
