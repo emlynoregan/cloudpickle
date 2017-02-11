@@ -299,6 +299,10 @@ class CloudPickler(Pickler):
                              obj=func)
             return
 
+        """ If the function contains recursions in its closure, this will 
+        fix that """
+        func = Combinator(func)
+
         save = self.save
         write = self.write
 
@@ -840,3 +844,93 @@ if sys.version_info < (3, 4):
     except ImportError:
         import copyreg
     copyreg.pickle(method_descriptor, _reduce_method_descriptor)
+
+########### Combinator function for recursive inner function support ###########
+
+import uuid
+
+def functionsEqual(f1, f2):
+    return f1 == f2 or \
+        (
+            f1.__name__ == "__placeholder__" and 
+            f2.__name__ == "__placeholder__" and 
+            f1() == f2()
+        )
+        
+def CopyClosureWithReplace(f, freplace, g, foundf):
+    if f.__closure__:
+        newValues = [
+            (
+                (
+                    g # (a)
+                    if functionsEqual(value, freplace) else
+                    (
+                        Combinator(value) # (b) 
+                        if value in foundf else
+                        CopyFunctionWithClosureReplace(
+                            value, freplace, g, foundf
+                        ) # (c)
+                    )
+                )
+                if isinstance(value, types.FunctionType) else 
+                value # (d)
+            )            
+            for value in [
+                lcell.cell_contents 
+                for lcell in f.__closure__
+            ]
+        ]
+        return tuple([_make_cell(value) for value in newValues])
+    else:
+        return None
+    
+def CopyFunctionWithClosureReplace(f, freplace, g, foundf = []):
+    return types.FunctionType(
+                f.__code__, 
+                f.__globals__, 
+                closure=CopyClosureWithReplace(
+                    f, freplace, g, foundf + [f]
+                )
+            )
+
+def MakeCombinatorForm(r):
+    lid = str(uuid.uuid4())
+    def __placeholder__():
+        return lid
+    rp = CopyFunctionWithClosureReplace(r, r, __placeholder__)
+    def h(g):
+        return CopyFunctionWithClosureReplace(
+            rp, __placeholder__, g
+        )
+    return h
+
+def HasRecursions(f, foundf=[]):
+    retval = False
+    if f and isinstance(f, types.FunctionType):
+        retval = f in foundf
+        if not retval and f.__closure__:
+            closureValues = [lcell.cell_contents 
+                            for lcell in f.__closure__]
+            for value in closureValues:
+                retval = HasRecursions(value, foundf + [f])
+                if retval:
+                    break
+    return retval   
+
+def YC(f):
+    return (
+        lambda x: x(x)
+    )(
+        lambda y:
+        f(
+            lambda *args, **kwargs:
+            y(y)(*args, **kwargs)
+        )
+    )
+
+def Combinator(f):
+    if HasRecursions(f):
+        f2 = YC(MakeCombinatorForm(f))
+    else:
+        f2 = f
+    return f2

@@ -62,3 +62,7 @@ Untitled.ipynb
 
 # Dev tools
 .idea
+.project
+.pydevproject
+.settings
+*~

@@ -3,7 +3,7 @@ import os
 from subprocess import Popen
 from subprocess import PIPE
 
-from cloudpickle import dumps
+from yccloudpickle import dumps
 from pickle import loads
 
 try:

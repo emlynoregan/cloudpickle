@@ -7,14 +7,14 @@ except ImportError:
     from distutils.core import setup
 
 dist = setup(
-    name='cloudpickle',
-    version='0.2.2',
-    description='Extended pickling support for Python objects',
-    author='Cloudpipe',
-    author_email='cloudpipe@googlegroups.com',
-    url='https://github.com/cloudpipe/cloudpickle',
+    name='yccloudpickle',
+    version='0.2.2.3',
+    description='Extended pickling support for Python objects + recursive inner function support',
+    author='Emlyn',
+    author_email='emlynoregan@gmail.com',
+    url='https://github.com/emlynoregan/yccloudpickle',
     license='LICENSE.txt',
-    packages=['cloudpickle'],
+    packages=['yccloudpickle'],
     long_description=open('README.md').read(),
     classifiers=[
         'Development Status :: 4 - Beta',

@@ -35,23 +35,23 @@ except ImportError:
 
 from io import BytesIO
 
-import cloudpickle
-from cloudpickle.cloudpickle import _find_module
+import yccloudpickle
+from yccloudpickle.yccloudpickle import _find_module
 
 from .testutils import subprocess_pickle_echo
 
 
 def pickle_depickle(obj):
-    """Helper function to test whether object pickled with cloudpickle can be
+    """Helper function to test whether object pickled with yccloudpickle can be
     depickled with pickle
     """
-    return pickle.loads(cloudpickle.dumps(obj))
+    return pickle.loads(yccloudpickle.dumps(obj))
 
 
 class CloudPicklerTest(unittest.TestCase):
     def setUp(self):
         self.file_obj = StringIO()
-        self.cloudpickler = cloudpickle.CloudPickler(self.file_obj, 2)
+        self.cloudpickler = yccloudpickle.CloudPickler(self.file_obj, 2)
 
 
 class CloudPickleTest(unittest.TestCase):
@@ -90,7 +90,7 @@ class CloudPickleTest(unittest.TestCase):
     # Regression test for SPARK-3415
     def test_pickling_file_handles(self):
         out1 = sys.stderr
-        out2 = pickle.loads(cloudpickle.dumps(out1))
+        out2 = pickle.loads(yccloudpickle.dumps(out1))
         self.assertEquals(out1, out2)
 
     def test_func_globals(self):
@@ -101,7 +101,7 @@ class CloudPickleTest(unittest.TestCase):
         global exit
         exit = Unpicklable()
 
-        self.assertRaises(Exception, lambda: cloudpickle.dumps(exit))
+        self.assertRaises(Exception, lambda: yccloudpickle.dumps(exit))
 
         def foo():
             sys.exit(0)
@@ -111,7 +111,7 @@ class CloudPickleTest(unittest.TestCase):
             func_code = foo.func_code
 
         self.assertTrue("exit" in func_code.co_names)
-        cloudpickle.dumps(foo)
+        yccloudpickle.dumps(foo)
 
     def test_buffer(self):
         try:
@@ -175,6 +175,30 @@ class CloudPickleTest(unittest.TestCase):
         new_method = subprocess_pickle_echo(SomeClass(5).some_method)
         self.assertEqual(new_method(41), 7)
 
+    def test_recursive_inner_function(self):
+        def getfact():
+            def factorial(n):
+                return factorial(n-1) * n if n > 0 else 1
+            return factorial
+
+        fact = pickle_depickle(getfact())
+        self.assertEqual(fact(10), 3628800)
+
+    def test_complex_recursive_inner_function(self):
+        def makefactouter():
+            def fact(n):
+                return fact(n-1) * n if n > 0 else 1
+            def fact2(n):
+                return fact2(n-1) * n if n > 0 else 1
+            def makefact():
+                fact2(4)
+                return fact
+            
+            return makefact
+
+        fact = pickle_depickle(makefactouter())
+        self.assertEqual(fact()(10), 3628800)
+
     def test_partial(self):
         partial_obj = functools.partial(min, 1)
         self.assertEqual(pickle_depickle(partial_obj)(4), 1)
@@ -199,7 +223,7 @@ class CloudPickleTest(unittest.TestCase):
 
     def test_save_unsupported(self):
         sio = StringIO()
-        pickler = cloudpickle.CloudPickler(sio, 2)
+        pickler = yccloudpickle.CloudPickler(sio, 2)
 
         with pytest.raises(pickle.PicklingError) as excinfo:
             pickler.save_unsupported("test")
@@ -208,15 +232,15 @@ class CloudPickleTest(unittest.TestCase):
 
     def test_loads_namespace(self):
         obj = 1, 2, 3, 4
-        returned_obj = cloudpickle.loads(cloudpickle.dumps(obj))
+        returned_obj = yccloudpickle.loads(yccloudpickle.dumps(obj))
         self.assertEqual(obj, returned_obj)
 
     def test_load_namespace(self):
         obj = 1, 2, 3, 4
         bio = BytesIO()
-        cloudpickle.dump(obj, bio)
+        yccloudpickle.dump(obj, bio)
         bio.seek(0)
-        returned_obj = cloudpickle.load(bio)
+        returned_obj = yccloudpickle.load(bio)
         self.assertEqual(obj, returned_obj)
 
     def test_generator(self):
@@ -326,7 +350,7 @@ class CloudPickleTest(unittest.TestCase):
             res = yield f(0.01, y)
             raise gen.Return(res + 1)
 
-        data = cloudpickle.dumps([g, g])
+        data = yccloudpickle.dumps([g, g])
         f = g = None
         g2, g3 = pickle.loads(data)
         self.assertTrue(g2 is g3)
@@ -354,7 +378,7 @@ class CloudPickleTest(unittest.TestCase):
         exec(textwrap.dedent(code), d, d)
         f = d['f']
         res = f()
-        data = cloudpickle.dumps([f, f])
+        data = yccloudpickle.dumps([f, f])
         d = f = None
         f2, f3 = pickle.loads(data)
         self.assertTrue(f2 is f3)
