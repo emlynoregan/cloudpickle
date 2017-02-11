@@ -6,7 +6,7 @@ This repo is a fork of cloudpickle. It adds the Y-Combinator based technique for
 * [Manually rewriting recursive inner functions to be serialisable in Python](https://medium.com/@emlynoregan/manually-rewriting-recursive-inner-functions-to-be-serialisable-in-python-83895792b176#.9g3ibfgi3)
 * [Automatically Serialising Recursive Inner Functions in Python using the Y Combinator](https://medium.com/@emlynoregan/automatically-serialising-recursive-inner-functions-in-python-using-the-y-combinator-fc5d37e50b29#.of57pdbqb)
 
-The rest of this readme is from the source cloudpickle library.
+The rest of this readme is from the [source cloudpickle library](https://github.com/cloudpipe/cloudpickle).
 
 # cloudpickle 
 
