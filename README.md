@@ -1,3 +1,5 @@
+**note** As far as I'm aware, cloudpickle now does everything that yccloudpickle can do (and then some; the codebase has moved on). I personally don't use yccloudpickle any more, I use cloudpickle everywhere. I'm leaving this here for anyone who's interested in the technique involved, but I recommend using cloudpickle for anything real. - Emlyn O'Regan 
+
 # yccloudpickle
 This repo is a fork of cloudpickle. It adds the Y-Combinator based technique for modifying recursive inner functions to make them serializable, detailed in these articles:
 
